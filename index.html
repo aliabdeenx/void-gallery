@@ -3,328 +3,899 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOID — Digital Art Gallery</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>VOID — Ali Abdeen × Claude</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{background:#080808;color:#fff;font-family:'Space Mono',monospace;cursor:none;overflow-x:hidden;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:#000;color:#fff;font-family:'Space Mono',monospace;cursor:none;overflow-x:hidden;}
 
-  #cur-dot{position:fixed;width:8px;height:8px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;}
-  #cur-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(255,255,255,.35);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s,left .08s linear,top .08s linear;}
-  #cur-trail{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9996;}
+/* INK CURSOR */
+#ink-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
 
-  nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:1.8rem 3rem;background:linear-gradient(to bottom,rgba(8,8,8,.95),transparent);}
-  .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.15em;}
-  .nav-links{display:flex;gap:2.5rem;list-style:none;}
-  .nav-links a{font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.35);text-decoration:none;text-transform:uppercase;transition:color .3s;}
-  .nav-links a:hover{color:#fff;}
+/* PAGES */
+.page{display:none;min-height:100vh;background:#000;}
+.page.active{display:block;}
 
-  #hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-  canvas#pcanvas{position:absolute;inset:0;width:100%;height:100%;}
-  .hero-inner{position:relative;z-index:2;text-align:center;}
-  .eyebrow{font-size:11px;letter-spacing:.4em;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:2rem;animation:fadeUp 1s ease .3s both;}
-  .main-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(90px,20vw,170px);line-height:.85;letter-spacing:-.02em;}
-  .main-title span{display:inline-block;opacity:0;transform:translateY(120%);animation:revealChar .9s cubic-bezier(.16,1,.3,1) forwards;}
-  .main-title span:nth-child(1){animation-delay:.6s}
-  .main-title span:nth-child(2){animation-delay:.75s}
-  .main-title span:nth-child(3){animation-delay:.9s}
-  .main-title span:nth-child(4){animation-delay:1.05s}
-  .tagline{font-size:12px;letter-spacing:.25em;color:rgba(255,255,255,.15);font-style:italic;margin-top:1.5rem;animation:fadeUp 1s ease 1.6s both;}
-  .scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;animation:fadeUp 1s ease 2.2s both;}
-  .scroll-hint span{font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.25);text-transform:uppercase;}
-  .scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);animation:scrollPulse 2s ease-in-out infinite;}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;justify-content:space-between;align-items:center;padding:1.6rem 3rem;background:linear-gradient(to bottom,rgba(0,0,0,.92),transparent);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.15em;cursor:none;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.35);text-decoration:none;text-transform:uppercase;transition:color .3s;cursor:none;}
+.nav-links a:hover,.nav-links a.active{color:#fff;}
 
-  .intro-section{padding:12rem 3rem 8rem;max-width:900px;margin:0 auto;}
-  .section-label{font-size:10px;letter-spacing:.4em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:2rem;}
-  .intro-text{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5vw,58px);line-height:1.1;}
-  .intro-text em{color:rgba(255,255,255,.18);font-style:normal;}
-  .intro-sub{font-size:12px;line-height:2;color:rgba(255,255,255,.35);margin-top:2rem;max-width:480px;}
+/* TERMINAL */
+#terminal-intro{position:fixed;inset:0;background:#000;z-index:9998;display:flex;align-items:center;justify-content:center;padding:3rem;}
+.term-box{max-width:520px;width:100%;}
+.term-line{font-size:12px;color:rgba(255,80,60,.85);letter-spacing:.1em;margin-bottom:.45rem;opacity:0;white-space:nowrap;overflow:hidden;width:0;}
+.term-line.typed{animation:typeIn .55s steps(40,end) forwards;}
+.term-cursor{display:inline-block;width:7px;height:13px;background:rgba(255,80,60,.8);animation:blink .7s steps(1) infinite;vertical-align:middle;}
+@keyframes typeIn{from{width:0;opacity:1}to{width:100%;opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-  .gallery-section{padding:4rem 3rem 8rem;}
-  .gallery-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4rem;border-top:1px solid rgba(255,255,255,.06);padding-top:2rem;}
-  .gallery-title{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:.05em;}
-  .gallery-count{font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.35);}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
-  .art-card{position:relative;cursor:none;overflow:hidden;background:#0d0d0d;border:1px solid rgba(255,255,255,.05);transition:border-color .3s;}
-  .art-card:nth-child(1){grid-column:span 2;aspect-ratio:2/1;}
-  .art-card:nth-child(2){aspect-ratio:1/1;}
-  .art-card:nth-child(3){aspect-ratio:1/1;}
-  .art-card:nth-child(4){aspect-ratio:1/1;}
-  .art-card:nth-child(5){grid-column:span 2;aspect-ratio:2/1;}
-  .art-card:hover{border-color:rgba(255,255,255,.2);}
-  .art-canvas{width:100%;height:100%;display:block;}
-  .art-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,.92) 0%,transparent 60%);opacity:0;transition:opacity .4s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem;}
-  .art-card:hover .art-overlay{opacity:1;}
-  .art-num{font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.4);margin-bottom:.4rem;}
-  .art-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.05em;}
-  .art-tag{font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.35);margin-top:.2rem;}
+/* HERO */
+#hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+canvas#bgcanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+canvas#pcanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
+.hero-inner{position:relative;z-index:2;text-align:center;}
+.eyebrow{font-size:10px;letter-spacing:.4em;color:rgba(255,255,255,.22);text-transform:uppercase;margin-bottom:2rem;}
+.main-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(90px,20vw,170px);line-height:.85;letter-spacing:-.02em;display:flex;justify-content:center;}
+.main-title .letter{display:inline-block;transition:transform .12s ease,color .08s,text-shadow .08s;will-change:transform;}
+.tagline{font-size:11px;letter-spacing:.25em;color:rgba(255,255,255,.1);font-style:italic;margin-top:1.5rem;}
+.makers{margin-top:1.8rem;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.15);text-transform:uppercase;}
+.makers strong{color:rgba(255,80,60,.55);font-weight:400;}
+.scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;}
+.scroll-hint span{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.18);text-transform:uppercase;}
+.scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,rgba(255,255,255,.22),transparent);animation:scrollPulse 2s ease-in-out infinite;}
 
-  .cta-section{padding:6rem 3rem 10rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3rem;}
-  .cta-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,8vw,90px);line-height:1;letter-spacing:.02em;}
-  .mag-btn-wrap{position:relative;display:inline-block;}
-  .mag-btn{display:inline-block;padding:1.2rem 3.5rem;border:1px solid rgba(255,255,255,.25);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#fff;background:transparent;cursor:none;position:relative;overflow:hidden;transition:border-color .3s;}
-  .mag-btn::before{content:'';position:absolute;inset:0;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.16,1,.3,1);}
-  .mag-btn:hover::before{transform:scaleX(1);}
-  .mag-btn:hover .btn-text{color:#080808;}
-  .btn-text{position:relative;z-index:1;transition:color .4s;}
+/* SECTIONS */
+.s{padding:9rem 3rem;max-width:1100px;margin:0 auto;}
+.s-label{font-size:9px;letter-spacing:.4em;color:rgba(255,80,60,.4);text-transform:uppercase;margin-bottom:1.8rem;}
+.s-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,5.5vw,66px);line-height:1;margin-bottom:1.8rem;}
+.s-body{font-size:11px;line-height:2.1;color:rgba(255,255,255,.28);max-width:520px;}
 
-  .glitch-divider{width:100%;padding:0 3rem;margin:2rem 0;}
-  .glitch-bar{width:100%;height:1px;background:rgba(255,255,255,.06);position:relative;overflow:hidden;}
-  .glitch-bar::after{content:'';position:absolute;top:0;left:-100%;width:40%;height:100%;background:linear-gradient(to right,transparent,rgba(255,255,255,.4),transparent);animation:scanBar 4s ease-in-out infinite;}
+/* CURATOR NOTE */
+.curator-box{border-left:1px solid rgba(255,80,60,.25);padding:2rem 2.5rem;margin:3rem auto;max-width:700px;}
+.curator-box p{font-size:11px;line-height:2.2;color:rgba(255,255,255,.3);font-style:italic;}
 
-  .footer-strip{border-top:1px solid rgba(255,255,255,.06);padding:3rem;display:flex;justify-content:space-between;align-items:center;}
-  .footer-strip p{font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.2);}
+/* FEATURED */
+.featured-section{padding:5rem 3rem 8rem;max-width:1100px;margin:0 auto;}
+.featured-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:4rem;align-items:center;margin-top:3rem;}
+.featured-canvas-wrap{position:relative;overflow:hidden;aspect-ratio:4/3;border:1px solid rgba(255,80,60,.15);}
+.featured-canvas-wrap canvas{width:100%;height:100%;display:block;}
+.featured-badge{position:absolute;top:1rem;left:1rem;font-size:9px;letter-spacing:.25em;color:rgba(255,80,60,.7);border:1px solid rgba(255,80,60,.3);padding:.3rem .8rem;text-transform:uppercase;background:rgba(0,0,0,.6);}
+.featured-info .art-year{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.3);margin-bottom:1rem;}
+.featured-info .art-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,5vw,72px);line-height:.9;margin-bottom:1.2rem;}
+.featured-info .art-subtitle{font-size:10px;letter-spacing:.2em;color:rgba(255,80,60,.5);text-transform:uppercase;margin-bottom:1.5rem;}
+.featured-info .art-desc{font-size:11px;line-height:2;color:rgba(255,255,255,.3);max-width:360px;margin-bottom:2rem;}
 
-  .glitch-overlay{position:fixed;inset:0;pointer-events:none;z-index:500;opacity:0;}
-  .glitch-overlay canvas{width:100%;height:100%;}
+/* BUTTONS */
+.btn-outline{display:inline-block;padding:.9rem 2.2rem;border:1px solid rgba(255,255,255,.2);font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#fff;background:transparent;cursor:none;position:relative;overflow:hidden;transition:border-color .3s;font-family:'Space Mono',monospace;}
+.btn-outline::before{content:'';position:absolute;inset:0;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.16,1,.3,1);}
+.btn-outline:hover::before{transform:scaleX(1);}
+.btn-outline:hover span{color:#000;}
+.btn-outline span{position:relative;z-index:1;transition:color .35s;}
+.btn-red{border-color:rgba(255,60,60,.4);}
+.btn-red::before{background:#ff3c3c;}
+.btn-red:hover span{color:#000;}
 
-  .reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease;}
-  .reveal.visible{opacity:1;transform:translateY(0);}
+/* LATEST DROP */
+.latest-section{padding:5rem 3rem 8rem;border-top:1px solid rgba(255,255,255,.04);}
+.latest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;max-width:1100px;}
+.latest-card{position:relative;overflow:hidden;background:#0a0a0a;border:1px solid rgba(255,255,255,.05);cursor:none;transition:border-color .3s;}
+.latest-card:hover{border-color:rgba(255,80,60,.25);}
+.latest-card canvas{width:100%;aspect-ratio:4/3;display:block;transition:transform .5s ease;}
+.latest-card:hover canvas{transform:scale(1.04);}
+.lc-info{padding:1.2rem;}
+.lc-num{font-size:9px;letter-spacing:.25em;color:rgba(255,80,60,.4);}
+.lc-name{font-family:'Bebas Neue',sans-serif;font-size:22px;margin:.3rem 0;}
+.lc-tag{font-size:9px;letter-spacing:.15em;color:rgba(255,255,255,.28);}
+.new-badge{position:absolute;top:.8rem;right:.8rem;font-size:8px;letter-spacing:.2em;background:rgba(255,60,60,.12);border:1px solid rgba(255,60,60,.3);color:rgba(255,80,60,.8);padding:.25rem .6rem;text-transform:uppercase;}
+.lc-hover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;background:rgba(0,0,0,.45);}
+.latest-card:hover .lc-hover{opacity:1;}
 
-  @media(max-width:768px){
-    nav{padding:1.2rem 1.5rem;}
-    .nav-links{gap:1.2rem;}
-    .intro-section{padding:8rem 1.5rem 4rem;}
-    .gallery-section{padding:2rem 1.5rem 6rem;}
-    .grid{grid-template-columns:1fr;}
-    .art-card:nth-child(1),.art-card:nth-child(5){grid-column:span 1;aspect-ratio:16/9;}
-    .cta-section{padding:4rem 1.5rem 6rem;}
-    .footer-strip{padding:2rem 1.5rem;flex-direction:column;gap:1rem;text-align:center;}
-  }
+/* HORIZ GALLERY */
+.horiz-wrap{overflow:hidden;}
+.horiz-track{display:flex;gap:2rem;padding:1rem 3rem 2rem;will-change:transform;}
+.horiz-card{flex:0 0 320px;height:240px;position:relative;overflow:hidden;background:#0d0d0d;border:1px solid rgba(255,255,255,.05);cursor:none;transition:border-color .3s;}
+.horiz-card:hover{border-color:rgba(255,80,60,.3);}
+.hc-canvas{width:100%;height:100%;display:block;transition:transform .5s ease;}
+.horiz-card:hover .hc-canvas{transform:scale(1.04);}
+.hc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.95) 0%,transparent 55%);opacity:0;transition:opacity .4s;padding:1.2rem;display:flex;flex-direction:column;justify-content:flex-end;}
+.horiz-card:hover .hc-overlay{opacity:1;}
+.hc-num{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.35);}
+.hc-name{font-family:'Bebas Neue',sans-serif;font-size:20px;margin:.2rem 0;}
+.hc-tag{font-size:9px;letter-spacing:.15em;color:rgba(255,80,60,.5);}
+.hc-credit{font-size:8px;letter-spacing:.12em;color:rgba(255,255,255,.16);margin-top:.3rem;}
+.view-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);opacity:0;font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.4);padding:.5rem 1.2rem;text-transform:uppercase;transition:opacity .3s,transform .3s;font-family:'Space Mono',monospace;background:rgba(0,0,0,.5);}
+.horiz-card:hover .view-btn{opacity:1;transform:translate(-50%,-50%) scale(1);}
 
-  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes revealChar{to{opacity:1;transform:translateY(0)}}
-  @keyframes scrollPulse{0%,100%{opacity:.4}50%{opacity:1}}
-  @keyframes scanBar{0%{left:-40%}100%{left:140%}}
+/* ARCHIVE */
+.archive-header{padding:8rem 3rem 3rem;max-width:1100px;margin:0 auto;}
+.filter-bar{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2.5rem;}
+.filter-btn{font-size:9px;letter-spacing:.2em;text-transform:uppercase;border:1px solid rgba(255,255,255,.12);padding:.5rem 1.2rem;cursor:none;transition:all .25s;background:transparent;color:rgba(255,255,255,.4);font-family:'Space Mono',monospace;}
+.filter-btn.active,.filter-btn:hover{border-color:rgba(255,80,60,.5);color:rgba(255,80,60,.8);}
+.archive-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;padding:3rem;max-width:1100px;margin:0 auto;}
+.archive-card{position:relative;overflow:hidden;background:#0a0a0a;border:1px solid rgba(255,255,255,.05);cursor:none;transition:border-color .3s,opacity .4s,transform .4s;}
+.archive-card:hover{border-color:rgba(255,80,60,.25);}
+.archive-card.hidden{opacity:0;transform:translateY(10px);pointer-events:none;position:absolute;}
+.ac-canvas{width:100%;aspect-ratio:4/3;display:block;transition:transform .5s;}
+.archive-card:hover .ac-canvas{transform:scale(1.04);}
+.ac-info{padding:1rem 1.2rem;}
+.ac-cat{font-size:8px;letter-spacing:.25em;color:rgba(255,80,60,.45);text-transform:uppercase;}
+.ac-name{font-family:'Bebas Neue',sans-serif;font-size:20px;margin:.25rem 0;}
+.ac-year{font-size:9px;color:rgba(255,255,255,.25);}
+.ac-hover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;background:rgba(0,0,0,.5);}
+.archive-card:hover .ac-hover{opacity:1;}
+
+/* ARTWORK PAGE */
+.artwork-page{padding:8rem 3rem 6rem;max-width:900px;margin:0 auto;}
+.aw-back{font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.3);text-transform:uppercase;cursor:none;border:none;background:none;transition:color .2s;margin-bottom:3rem;display:inline-block;font-family:'Space Mono',monospace;}
+.aw-back:hover{color:#fff;}
+.aw-num{font-size:9px;letter-spacing:.3em;color:rgba(255,80,60,.4);margin-bottom:1rem;display:block;}
+.aw-title-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,96px);line-height:.85;margin-bottom:2rem;}
+.aw-canvas-wrap{width:100%;position:relative;border:1px solid rgba(255,80,60,.1);margin:2rem 0;overflow:hidden;}
+.aw-canvas-wrap canvas{width:100%;display:block;}
+.aw-details{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin:3rem 0;border-top:1px solid rgba(255,255,255,.05);padding-top:2rem;}
+.detail-label{font-size:9px;letter-spacing:.3em;color:rgba(255,80,60,.4);text-transform:uppercase;margin-bottom:.5rem;}
+.detail-val{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.05em;}
+.aw-description{font-size:11px;line-height:2.2;color:rgba(255,255,255,.28);border-left:1px solid rgba(255,80,60,.2);padding-left:1.5rem;margin:2rem 0;}
+.aw-process h4{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:1rem;}
+.aw-process p{font-size:11px;line-height:2;color:rgba(255,255,255,.22);}
+
+/* ABOUT */
+.about-section{padding:7rem 3rem;border-top:1px solid rgba(255,255,255,.04);display:flex;gap:5rem;flex-wrap:wrap;max-width:1100px;margin:0 auto;}
+.about-col{flex:1;min-width:240px;}
+.about-big{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:.9;color:rgba(255,255,255,.04);}
+.about-big span{display:block;color:rgba(255,80,60,.45);}
+.about-role{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.22);text-transform:uppercase;margin-top:1rem;}
+.about-body{font-size:11px;line-height:2.1;color:rgba(255,255,255,.25);margin-top:1.2rem;}
+.tag-pill{display:inline-block;border:1px solid rgba(255,60,60,.18);font-size:9px;letter-spacing:.22em;color:rgba(255,80,60,.4);padding:.35rem .8rem;margin-top:1.4rem;text-transform:uppercase;}
+
+/* CTA */
+.cta-section{padding:8rem 3rem;text-align:center;border-top:1px solid rgba(255,255,255,.04);}
+.cta-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,9vw,96px);line-height:1;}
+.cta-sub{font-size:11px;color:rgba(255,255,255,.25);margin-top:1rem;letter-spacing:.1em;}
+.cta-btns{display:flex;gap:1.5rem;justify-content:center;margin-top:3rem;flex-wrap:wrap;}
+.mag-wrap{position:relative;display:inline-block;}
+.mag-btn{padding:1.1rem 3rem;border:1px solid rgba(255,60,60,.3);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#fff;background:transparent;cursor:none;position:relative;overflow:hidden;transition:border-color .3s;}
+.mag-btn::before{content:'';position:absolute;inset:0;background:#ff3c3c;transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.16,1,.3,1);}
+.mag-btn:hover::before{transform:scaleX(1);}
+.mag-btn:hover .btn-txt{color:#000;}
+.btn-txt{position:relative;z-index:1;transition:color .35s;}
+.mag-btn-ghost{border:1px solid rgba(255,255,255,.12);background:transparent;padding:1.1rem 3rem;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.35);cursor:none;transition:color .3s,border-color .3s;}
+.mag-btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+
+/* FOOTER */
+.site-footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:4rem 3rem 2.5rem;}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:3rem;max-width:1100px;margin:0 auto 3rem;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.1em;}
+.footer-brand p{font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-top:.5rem;}
+.footer-col h4{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.18);text-transform:uppercase;margin-bottom:1.2rem;}
+.footer-col a{display:block;font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.28);text-decoration:none;margin-bottom:.7rem;text-transform:uppercase;cursor:none;transition:color .25s;}
+.footer-col a:hover{color:rgba(255,80,60,.7);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.04);padding-top:1.5rem;max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{font-size:9px;letter-spacing:.18em;color:rgba(255,255,255,.15);}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9000;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.lightbox.open{display:flex;}
+.lb-canvas{max-width:80vw;max-height:65vh;border:1px solid rgba(255,80,60,.12);}
+.lb-info{margin-top:1.5rem;text-align:center;}
+.lb-name{font-family:'Bebas Neue',sans-serif;font-size:32px;}
+.lb-tag{font-size:9px;letter-spacing:.25em;color:rgba(255,80,60,.5);margin-top:.3rem;}
+.lb-credit{font-size:8px;letter-spacing:.18em;color:rgba(255,255,255,.18);margin-top:.4rem;}
+.lb-close{position:absolute;top:2rem;right:2.5rem;font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.3);cursor:none;text-transform:uppercase;background:none;border:none;transition:color .2s;font-family:'Space Mono',monospace;}
+.lb-close:hover{color:#fff;}
+
+/* UTILS */
+.glitch-overlay{position:fixed;inset:0;pointer-events:none;z-index:500;opacity:0;}
+.glitch-bar-wrap{padding:0 3rem;}
+.glitch-bar{height:1px;background:rgba(255,255,255,.04);position:relative;overflow:hidden;}
+.glitch-bar::after{content:'';position:absolute;top:0;left:-40%;width:40%;height:100%;background:linear-gradient(to right,transparent,rgba(255,80,60,.5),transparent);animation:scanBar 4s ease-in-out infinite;}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .85s ease,transform .85s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:768px){
+  nav{padding:1.2rem 1.5rem;}.nav-links{gap:1rem;}
+  .s,.featured-section,.latest-section,.about-section,.cta-section,.archive-header,.artwork-page{padding-left:1.5rem;padding-right:1.5rem;}
+  .featured-grid{grid-template-columns:1fr;}
+  .latest-grid,.archive-grid{grid-template-columns:1fr;}
+  .aw-details{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr;}
+  .cta-btns{flex-direction:column;align-items:center;}
+  .archive-grid{padding:1.5rem;}
+}
+@keyframes scrollPulse{0%,100%{opacity:.3}50%{opacity:.8}}
+@keyframes scanBar{0%{left:-40%}100%{left:140%}}
+@keyframes heroReveal{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.hero-revealed .eyebrow{animation:heroReveal .9s ease .1s both;}
+.hero-revealed .main-title{animation:heroReveal .9s ease .3s both;}
+.hero-revealed .tagline{animation:heroReveal .9s ease .55s both;}
+.hero-revealed .makers{animation:heroReveal .9s ease .75s both;}
+.hero-revealed .scroll-hint{animation:heroReveal .9s ease .95s both;}
 </style>
 </head>
 <body>
 
-<div id="cur-dot"></div>
-<div id="cur-ring"></div>
-<canvas id="cur-trail"></canvas>
+<!-- INK CURSOR CANVAS -->
+<canvas id="ink-canvas"></canvas>
 <div class="glitch-overlay" id="goverlay"><canvas id="gcanvas"></canvas></div>
 
+<!-- TERMINAL -->
+<div id="terminal-intro">
+  <div class="term-box" id="term-box"><span class="term-cursor" id="term-cur"></span></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lightbox">
+  <button class="lb-close" id="lb-close">[ Close ]</button>
+  <canvas class="lb-canvas" id="lb-canvas"></canvas>
+  <div class="lb-info"><p class="lb-name" id="lb-name"></p><p class="lb-tag" id="lb-tag"></p><p class="lb-credit">Ali Abdeen × Claude — 2026</p></div>
+</div>
+
+<!-- NAV -->
 <nav>
-  <div class="nav-logo">VOID</div>
+  <div class="nav-logo" onclick="showPage('home')">VOID</div>
   <ul class="nav-links">
-    <li><a href="#gallery">Works</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#cta">Archive</a></li>
-    <li><a href="#cta">Contact</a></li>
+    <li><a href="#" onclick="showPage('home');return false;" class="nav-home active">Works</a></li>
+    <li><a href="#" onclick="showPage('archive');return false;" class="nav-archive">Archive</a></li>
+    <li><a href="#" onclick="showPage('about');return false;" class="nav-about">About</a></li>
+    <li><a href="mailto:ali@void.gallery">Contact</a></li>
   </ul>
 </nav>
 
-<section id="hero">
-  <canvas id="pcanvas"></canvas>
-  <div class="hero-inner">
-    <p class="eyebrow">Digital Art Gallery — Est. 2026</p>
-    <div class="main-title" id="glitch-title" aria-label="VOID">
-      <span>V</span><span>O</span><span>I</span><span>D</span>
+<!-- ═══ HOME PAGE ═══ -->
+<div id="page-home" class="page active">
+  <section id="hero">
+    <canvas id="bgcanvas"></canvas>
+    <canvas id="pcanvas"></canvas>
+    <div class="hero-inner" id="hero-inner" style="will-change:transform;">
+      <p class="eyebrow">Digital Art Gallery — Est. 2026</p>
+      <div class="main-title" id="void-title">
+        <span class="letter">V</span><span class="letter">O</span><span class="letter">I</span><span class="letter">D</span>
+      </div>
+      <span class="tagline">— where darkness becomes form —</span>
+      <p class="makers">Made by <strong>Ali Abdeen</strong> &amp; <strong>Claude</strong></p>
     </div>
-    <span class="tagline">— where darkness becomes form —</span>
+    <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+  </section>
+
+  <div style="background:#000;">
+
+  <section class="s reveal">
+    <p class="s-label">// 001 — Manifesto</p>
+    <h2 class="s-title">Art is the signal<br>that survives the noise.</h2>
+    <p class="s-body">VOID is not a gallery. It is a frequency. A place where data corrupts into beauty, where errors become statements, and where the broken speaks louder than the whole. Every pixel here was decided by two minds — one human, one machine — neither able to make it alone.</p>
+  </section>
+
+  <div class="curator-box reveal">
+    <p class="s-label" style="margin-bottom:1rem;">// Curator Note</p>
+    <p>VOID is an experimental digital gallery exploring generative, glitch, and algorithmic aesthetics. The project investigates how chaos, code, and corrupted data can produce unexpected beauty. Each work is a unique event — procedurally generated, never repeated, never preserved. To view it is to witness it disappear.</p>
   </div>
-  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
-</section>
 
-<section class="intro-section reveal" id="about">
-  <p class="section-label">// Manifesto</p>
-  <h2 class="intro-text">Art lives <em>in the space</em> between signal <em>and</em> noise.</h2>
-  <p class="intro-sub">VOID is a digital gallery exploring generative, glitch, and data-corrupted aesthetics. Each piece is a unique collision of code and chaos — never the same twice.</p>
-</section>
+  <div class="glitch-bar-wrap reveal"><div class="glitch-bar"></div></div>
 
-<div class="glitch-divider reveal"><div class="glitch-bar"></div></div>
+  <!-- FEATURED -->
+  <section class="featured-section reveal">
+    <p class="s-label">// 002 — Featured Artwork</p>
+    <div class="featured-grid">
+      <div class="featured-canvas-wrap">
+        <canvas id="featured-canvas"></canvas>
+        <div class="featured-badge">Featured</div>
+      </div>
+      <div class="featured-info">
+        <p class="art-year">2026</p>
+        <h2 class="art-title">Null Entity</h2>
+        <p class="art-subtitle">Generative glitch composition</p>
+        <p class="art-desc">A study of corrupted signals and emergent forms in digital void. Where the machine fails, beauty emerges — raw data rendered into something that feels like grief.</p>
+        <button class="btn-outline btn-red" onclick="showArtwork(1)"><span>View Artwork</span></button>
+      </div>
+    </div>
+  </section>
 
-<section class="gallery-section" id="gallery">
-  <div class="gallery-header reveal">
-    <h2 class="gallery-title">Selected Works</h2>
-    <span class="gallery-count">05 / 2026</span>
+  <div class="glitch-bar-wrap reveal"><div class="glitch-bar"></div></div>
+
+  <!-- LATEST DROP -->
+  <section class="latest-section reveal">
+    <div style="max-width:1100px;margin:0 auto;">
+      <p class="s-label">// 003 — Latest Drop</p>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.5rem;">
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:.04em;">New Works</h2>
+        <span style="font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.2);">Added to the archive</span>
+      </div>
+      <p style="font-size:10px;color:rgba(255,255,255,.2);margin-bottom:2rem;letter-spacing:.1em;">Fresh additions — 2026</p>
+    </div>
+    <div class="latest-grid" style="max-width:1100px;margin:0 auto 0;">
+      <div class="latest-card reveal" onclick="showArtwork(2)">
+        <div class="new-badge">New</div>
+        <canvas id="lc0"></canvas>
+        <div class="lc-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div>
+        <div class="lc-info"><p class="lc-num">003</p><p class="lc-name">Void Pulse</p><p class="lc-tag">Oscillation / 2026</p></div>
+      </div>
+      <div class="latest-card reveal" onclick="showArtwork(3)">
+        <div class="new-badge">New</div>
+        <canvas id="lc1"></canvas>
+        <div class="lc-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div>
+        <div class="lc-info"><p class="lc-num">004</p><p class="lc-name">Static Dream</p><p class="lc-tag">Noise Field / 2026</p></div>
+      </div>
+      <div class="latest-card reveal" onclick="showArtwork(4)">
+        <div class="new-badge">New</div>
+        <canvas id="lc2"></canvas>
+        <div class="lc-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div>
+        <div class="lc-info"><p class="lc-num">005</p><p class="lc-name">Fracture Map</p><p class="lc-tag">Displacement / 2026</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="glitch-bar-wrap reveal"><div class="glitch-bar"></div></div>
+
+  <!-- SELECTED WORKS -->
+  <section style="padding:5rem 0 8rem;" id="gallery">
+    <div style="padding:0 3rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-end;max-width:1100px;margin:0 auto;" class="reveal">
+      <div><p class="s-label">// 004 — Selected Works</p><h2 style="font-family:'Bebas Neue',sans-serif;font-size:44px;">The Collection</h2></div>
+      <span style="font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.2);">Drag to explore →</span>
+    </div>
+    <div class="horiz-wrap" id="horiz-wrap">
+      <div class="horiz-track" id="horiz-track">
+        <div class="horiz-card" onclick="showArtwork(0)"><canvas class="hc-canvas" id="hc0"></canvas><div class="hc-overlay"><p class="hc-num">001</p><p class="hc-name">Signal Decay</p><p class="hc-tag">Generative / Glitch</p><p class="hc-credit">Ali Abdeen × Claude</p></div><div class="view-btn">[ View ]</div></div>
+        <div class="horiz-card" onclick="showArtwork(1)"><canvas class="hc-canvas" id="hc1"></canvas><div class="hc-overlay"><p class="hc-num">002</p><p class="hc-name">Null Entity</p><p class="hc-tag">Data Corruption</p><p class="hc-credit">Ali Abdeen × Claude</p></div><div class="view-btn">[ View ]</div></div>
+        <div class="horiz-card" onclick="showArtwork(2)"><canvas class="hc-canvas" id="hc2"></canvas><div class="hc-overlay"><p class="hc-num">003</p><p class="hc-name">Void Pulse</p><p class="hc-tag">Oscillation</p><p class="hc-credit">Ali Abdeen × Claude</p></div><div class="view-btn">[ View ]</div></div>
+        <div class="horiz-card" onclick="showArtwork(3)"><canvas class="hc-canvas" id="hc3"></canvas><div class="hc-overlay"><p class="hc-num">004</p><p class="hc-name">Static Dream</p><p class="hc-tag">Noise Field</p><p class="hc-credit">Ali Abdeen × Claude</p></div><div class="view-btn">[ View ]</div></div>
+        <div class="horiz-card" onclick="showArtwork(4)"><canvas class="hc-canvas" id="hc4"></canvas><div class="hc-overlay"><p class="hc-num">005</p><p class="hc-name">Fracture Map</p><p class="hc-tag">Displacement</p><p class="hc-credit">Ali Abdeen × Claude</p></div><div class="view-btn">[ View ]</div></div>
+        <div class="horiz-card" onclick="showArtwork(5)"><canvas class="hc-canvas" id="hc5"></canvas><div class="hc-overlay"><p class="hc-num">006</p><p class="hc-name">Echo Chamber</p><p class="hc-tag">Recursive Glitch</p><p class="hc-credit">Ali Abdeen × Claude</p></div><div class="view-btn">[ View ]</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="glitch-bar-wrap reveal"><div class="glitch-bar"></div></div>
+
+  <!-- ABOUT -->
+  <div class="about-section reveal">
+    <div class="about-col">
+      <div class="about-big">ALI<span>ABDEEN</span></div>
+      <p class="about-role">// Visual Artist & Creative Director</p>
+      <p class="about-body">Ali Abdeen is a digital artist operating at the edge of glitch culture and generative systems. His practice questions what it means to make art when the machine is your collaborator — not your tool. VOID is his most personal work yet.</p>
+      <span class="tag-pill">Human Intelligence</span>
+    </div>
+    <div class="about-col">
+      <div class="about-big" style="color:rgba(255,255,255,.03);">CLAUDE<span style="color:rgba(255,80,60,.3);">AI</span></div>
+      <p class="about-role">// Generative Intelligence & Code Architect</p>
+      <p class="about-body">Claude is an AI by Anthropic — here as a creative equal. Every glitch algorithm, every particle system, every animation curve in VOID was written in live dialogue between Ali's vision and Claude's execution.</p>
+      <span class="tag-pill">Artificial Intelligence</span>
+    </div>
   </div>
-  <div class="grid">
-    <div class="art-card reveal"><canvas class="art-canvas" id="c0"></canvas><div class="art-overlay"><p class="art-num">001</p><p class="art-name">Signal Decay</p><p class="art-tag">Generative / Glitch</p></div></div>
-    <div class="art-card reveal"><canvas class="art-canvas" id="c1"></canvas><div class="art-overlay"><p class="art-num">002</p><p class="art-name">Null Entity</p><p class="art-tag">Data Corruption</p></div></div>
-    <div class="art-card reveal"><canvas class="art-canvas" id="c2"></canvas><div class="art-overlay"><p class="art-num">003</p><p class="art-name">Void Pulse</p><p class="art-tag">Oscillation</p></div></div>
-    <div class="art-card reveal"><canvas class="art-canvas" id="c3"></canvas><div class="art-overlay"><p class="art-num">004</p><p class="art-name">Static Dream</p><p class="art-tag">Noise Field</p></div></div>
-    <div class="art-card reveal"><canvas class="art-canvas" id="c4"></canvas><div class="art-overlay"><p class="art-num">005</p><p class="art-name">Fracture Map</p><p class="art-tag">Displacement</p></div></div>
+
+  <!-- CTA -->
+  <section class="cta-section reveal" id="contact">
+    <p class="s-label">// 005 — Enter</p>
+    <h2 class="cta-title">Enter the<br>Archive.</h2>
+    <p class="cta-sub">Discover the full collection — 6 works, each a unique signal.</p>
+    <div class="cta-btns">
+      <div class="mag-wrap" id="mw1">
+        <button class="mag-btn" id="mb1" onclick="showPage('archive')"><span class="btn-txt">Explore Archive</span></button>
+      </div>
+      <button class="mag-btn-ghost" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">View Selected Works</button>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo">VOID</div><p>Digital Art Gallery</p></div>
+      <div class="footer-col"><h4>Explore</h4><a href="#" onclick="showPage('home');return false;">Works</a><a href="#" onclick="showPage('archive');return false;">Archive</a><a href="#" onclick="showPage('about');return false;">About</a></div>
+      <div class="footer-col"><h4>Connect</h4><a href="https://instagram.com" target="_blank">Instagram</a><a href="https://twitter.com" target="_blank">Twitter / X</a><a href="mailto:ali@void.gallery">Email</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 VOID — Ali Abdeen × Claude</p><p>Signal lost. Beauty found.</p></div>
+  </footer>
   </div>
-</section>
+</div>
 
-<div class="glitch-divider reveal"><div class="glitch-bar"></div></div>
-
-<section class="cta-section reveal" id="cta">
-  <p class="section-label">// Enter The Void</p>
-  <h2 class="cta-title">Ready to<br>lose yourself?</h2>
-  <div class="mag-btn-wrap" id="magwrap">
-    <button class="mag-btn" id="magbtn"><span class="btn-text">Explore Archive</span></button>
+<!-- ═══ ARCHIVE PAGE ═══ -->
+<div id="page-archive" class="page">
+  <div class="archive-header">
+    <p class="s-label">// Full Archive</p>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,7vw,88px);line-height:.9;">All Works</h2>
+    <p style="font-size:10px;color:rgba(255,255,255,.2);margin-top:1rem;letter-spacing:.15em;">6 works — 2026 — Ali Abdeen × Claude</p>
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="generative">Generative</button>
+      <button class="filter-btn" data-filter="glitch">Glitch</button>
+      <button class="filter-btn" data-filter="algorithmic">Algorithmic</button>
+      <button class="filter-btn" data-filter="experimental">Experimental</button>
+    </div>
   </div>
-</section>
+  <div class="archive-grid" id="archive-grid">
+    <div class="archive-card" data-cats="generative glitch" onclick="showArtwork(0)"><canvas class="ac-canvas" id="ac0"></canvas><div class="ac-info"><p class="ac-cat">Generative / Glitch</p><p class="ac-name">Signal Decay</p><p class="ac-year">2026</p></div><div class="ac-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div></div>
+    <div class="archive-card" data-cats="generative algorithmic" onclick="showArtwork(1)"><canvas class="ac-canvas" id="ac1"></canvas><div class="ac-info"><p class="ac-cat">Generative / Algorithmic</p><p class="ac-name">Null Entity</p><p class="ac-year">2026</p></div><div class="ac-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div></div>
+    <div class="archive-card" data-cats="experimental glitch" onclick="showArtwork(2)"><canvas class="ac-canvas" id="ac2"></canvas><div class="ac-info"><p class="ac-cat">Experimental / Glitch</p><p class="ac-name">Void Pulse</p><p class="ac-year">2026</p></div><div class="ac-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div></div>
+    <div class="archive-card" data-cats="algorithmic experimental" onclick="showArtwork(3)"><canvas class="ac-canvas" id="ac3"></canvas><div class="ac-info"><p class="ac-cat">Algorithmic / Experimental</p><p class="ac-name">Static Dream</p><p class="ac-year">2026</p></div><div class="ac-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div></div>
+    <div class="archive-card" data-cats="glitch generative" onclick="showArtwork(4)"><canvas class="ac-canvas" id="ac4"></canvas><div class="ac-info"><p class="ac-cat">Glitch / Generative</p><p class="ac-name">Fracture Map</p><p class="ac-year">2026</p></div><div class="ac-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div></div>
+    <div class="archive-card" data-cats="experimental algorithmic" onclick="showArtwork(5)"><canvas class="ac-canvas" id="ac5"></canvas><div class="ac-info"><p class="ac-cat">Experimental / Recursive</p><p class="ac-name">Echo Chamber</p><p class="ac-year">2026</p></div><div class="ac-hover"><span style="font-size:9px;letter-spacing:.2em;border:1px solid rgba(255,255,255,.3);padding:.5rem 1rem;">[ View ]</span></div></div>
+  </div>
+  <footer class="site-footer" style="margin-top:4rem;">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo">VOID</div><p>Digital Art Gallery</p></div>
+      <div class="footer-col"><h4>Explore</h4><a href="#" onclick="showPage('home');return false;">Works</a><a href="#" onclick="showPage('archive');return false;">Archive</a><a href="#" onclick="showPage('about');return false;">About</a></div>
+      <div class="footer-col"><h4>Connect</h4><a href="https://instagram.com" target="_blank">Instagram</a><a href="https://twitter.com" target="_blank">Twitter / X</a><a href="mailto:ali@void.gallery">Email</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 VOID — Ali Abdeen × Claude</p><p>Signal lost. Beauty found.</p></div>
+  </footer>
+</div>
 
-<footer class="footer-strip reveal">
-  <p>© VOID 2026 — All rights reserved</p>
-  <p>Built with chaos &amp; code</p>
-</footer>
+<!-- ═══ ARTWORK PAGE ═══ -->
+<div id="page-artwork" class="page">
+  <div class="artwork-page">
+    <button class="aw-back" id="aw-back">← Back</button>
+    <span class="aw-num" id="aw-num"></span>
+    <h1 class="aw-title-big" id="aw-title"></h1>
+    <div class="aw-canvas-wrap"><canvas id="aw-canvas" style="width:100%;display:block;"></canvas></div>
+    <div class="aw-details">
+      <div><p class="detail-label">Year</p><p class="detail-val" id="aw-year"></p></div>
+      <div><p class="detail-label">Medium</p><p class="detail-val" id="aw-medium"></p></div>
+      <div><p class="detail-label">Category</p><p class="detail-val" id="aw-cat"></p></div>
+      <div><p class="detail-label">Edition</p><p class="detail-val">1 of 1 — Unique</p></div>
+    </div>
+    <p class="aw-description" id="aw-desc"></p>
+    <div class="aw-process"><h4>// Process & Technique</h4><p id="aw-process"></p></div>
+    <div style="margin-top:3rem;display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <button class="btn-outline btn-red" id="aw-fullscreen"><span>Full Screen</span></button>
+      <button class="btn-outline" id="aw-back2"><span>← All Works</span></button>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo">VOID</div><p>Digital Art Gallery</p></div>
+      <div class="footer-col"><h4>Explore</h4><a href="#" onclick="showPage('home');return false;">Works</a><a href="#" onclick="showPage('archive');return false;">Archive</a><a href="#" onclick="showPage('about');return false;">About</a></div>
+      <div class="footer-col"><h4>Connect</h4><a href="https://instagram.com" target="_blank">Instagram</a><a href="https://twitter.com" target="_blank">Twitter / X</a><a href="mailto:ali@void.gallery">Email</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 VOID — Ali Abdeen × Claude</p><p>Signal lost. Beauty found.</p></div>
+  </footer>
+</div>
+
+<!-- ═══ ABOUT PAGE ═══ -->
+<div id="page-about" class="page">
+  <div style="padding:8rem 3rem 6rem;max-width:1100px;margin:0 auto;">
+    <p class="s-label" style="margin-bottom:3rem;">// About VOID</p>
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,10vw,120px);line-height:.85;margin-bottom:3rem;">Two minds.<br><span style="color:rgba(255,80,60,.5);">One void.</span></h1>
+    <p style="font-size:12px;line-height:2.2;color:rgba(255,255,255,.3);max-width:620px;margin-bottom:4rem;">VOID emerged from a single question: what happens when a human artist and an AI architect share creative authorship with no hierarchy? The answer is this gallery — raw, uncompromising, and genuinely collaborative in a way that has never existed before.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;margin-bottom:4rem;">
+      <div>
+        <div class="about-big" style="font-size:64px;">ALI<span>ABDEEN</span></div>
+        <p class="about-role" style="margin-top:1.2rem;">// Visual Artist & Creative Director</p>
+        <p class="about-body" style="margin-top:1.2rem;">Digital artist, creative director, and explorer of the space where technology fails beautifully. Ali's practice is rooted in the belief that constraints — broken data, failed systems, corrupted signals — are not obstacles to art, but the material of it. Based in Cairo. Working everywhere.</p>
+        <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;">
+          <span class="tag-pill">Cairo, Egypt</span><span class="tag-pill">Digital Art</span><span class="tag-pill">Glitch Culture</span>
+        </div>
+      </div>
+      <div>
+        <div class="about-big" style="font-size:64px;color:rgba(255,255,255,.03);">CLAUDE<span style="color:rgba(255,80,60,.3);">AI</span></div>
+        <p class="about-role" style="margin-top:1.2rem;">// Generative Intelligence & Code Architect</p>
+        <p class="about-body" style="margin-top:1.2rem;">Claude is an AI system built by Anthropic. In VOID, Claude acts as an equal creative partner — not a tool, not an executor, but a co-author. Every algorithm was designed in dialogue. Every aesthetic decision was negotiated between intention and computation. Built by Anthropic. Collaborating everywhere.</p>
+        <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;">
+          <span class="tag-pill">Anthropic</span><span class="tag-pill">Generative Code</span><span class="tag-pill">AI Art</span>
+        </div>
+      </div>
+    </div>
+    <div class="curator-box" style="margin:4rem 0;">
+      <p class="s-label" style="margin-bottom:1rem;">// Curator Note</p>
+      <p>VOID is an experimental digital gallery exploring generative, glitch, and algorithmic aesthetics. The project investigates how chaos, code, and corrupted data can produce unexpected beauty. Each work is a unique event — procedurally generated, never repeated, never preserved. To view it is to witness it disappear.</p>
+    </div>
+    <div style="text-align:center;padding:3rem 0;">
+      <button class="btn-outline btn-red" onclick="showPage('archive')"><span>View the Archive →</span></button>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo">VOID</div><p>Digital Art Gallery</p></div>
+      <div class="footer-col"><h4>Explore</h4><a href="#" onclick="showPage('home');return false;">Works</a><a href="#" onclick="showPage('archive');return false;">Archive</a><a href="#" onclick="showPage('about');return false;">About</a></div>
+      <div class="footer-col"><h4>Connect</h4><a href="https://instagram.com" target="_blank">Instagram</a><a href="https://twitter.com" target="_blank">Twitter / X</a><a href="mailto:ali@void.gallery">Email</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 VOID — Ali Abdeen × Claude</p><p>Signal lost. Beauty found.</p></div>
+  </footer>
+</div>
 
 <script>
-// ── CURSOR ──
-const dot=document.getElementById('cur-dot');
-const ring=document.getElementById('cur-ring');
-const trailCanvas=document.getElementById('cur-trail');
-const tctx=trailCanvas.getContext('2d');
-let mx=0,my=0,rx=0,ry=0,trail=[];
-function resizeTrail(){trailCanvas.width=window.innerWidth;trailCanvas.height=window.innerHeight;}
-resizeTrail();
-window.addEventListener('resize',resizeTrail);
+// ═══ DATA ═══
+const ARTWORKS=[
+  {id:0,num:'001',name:'Signal Decay',year:'2026',cat:'Generative / Glitch',medium:'Generative Code, Canvas API',
+   desc:'A study in signal entropy — where clean data degrades into pure visual noise. Red scanlines fracture across the canvas in patterns that mirror how analog television dies: not in silence but in spectacular, beautiful failure.',
+   process:'Generated using layered canvas operations: random horizontal slice displacement, chromatic aberration simulation, and recursive scanline corruption. Each render is unique — the algorithm produces no two identical results.'},
+  {id:1,num:'002',name:'Null Entity',year:'2026',cat:'Data Corruption / Scatter',medium:'Pixel Manipulation, Canvas API',
+   desc:'A study of corrupted signals and emergent forms in digital void. Where the machine fails, beauty emerges — raw data rendered into something that feels like grief. Blue particles scatter across compressed darkness like lost transmissions.',
+   process:'Built using createImageData pixel manipulation combined with vertical line overlays. The blue scatter effect simulates compression artifacts from lossy digital encoding. Horizontal tears are applied post-render using getImageData slice displacement.'},
+  {id:2,num:'003',name:'Void Pulse',year:'2026',cat:'Oscillation / Experimental',medium:'Concentric Geometry, Glitch Injection',
+   desc:'Concentric circles that breathe, collapse, and corrupt. The pulse represents a heartbeat that has lost its rhythm — still beating, but wrong. Red glitch injections fire at random, breaking the pattern at the moment it becomes predictable.',
+   process:'Radial arc rendering with probabilistic glitch injection at 30% per ring. Phase-shifted displacement creates the breathing illusion. Red horizontal tears are drawn post-ring-render, simulating analog sync errors.'},
+  {id:3,num:'004',name:'Static Dream',year:'2026',cat:'Noise Field / Algorithmic',medium:'Pixel Noise, Displacement Maps',
+   desc:'Pure noise filtered through intention. The static is not random — it is structured chaos, a noise field shaped by invisible hands into something that almost resolves into an image, then refuses.',
+   process:'ImageData pixel-by-pixel population at 3% density threshold. Post-render slice operations with warm tint overlays simulate analog tape degradation. The effect is non-deterministic but bounded.'},
+  {id:4,num:'005',name:'Fracture Map',year:'2026',cat:'Displacement / Glitch',medium:'Pixel Grid, Chromatic Displacement',
+   desc:'The canvas as territory. The glitch as earthquake. Fracture Map renders the surface of a digital landscape subjected to forces it was never designed to withstand — and survived, transformed.',
+   process:'4x4 pixel grid with 15% fill probability per cell, producing a dense micro-mosaic. Oversized cells appear at 5% probability, breaking the grid rhythm. Horizontal white tears and cyan displacement lines applied as a final glitch pass.'},
+  {id:5,num:'006',name:'Echo Chamber',year:'2026',cat:'Recursive / Experimental',medium:'Recursive Glitch, Signal Echo',
+   desc:'What happens when a signal is fed back into itself? Echo Chamber is the answer — a recursive glitch that builds on its own corruption, layer by layer, until the original is unrecognizable and entirely itself.',
+   process:'Applies Signal Decay as a base, then recursively re-renders corrupted segments with offset displacement. Each iteration amplifies distortion. The final state is determined by accumulated chaos — not design.'}
+];
+
+// ═══ ART GENERATORS ═══
+function art0(c){
+  const ctx=c.getContext('2d');
+  const W=c.offsetWidth>0?c.offsetWidth:c.width||600;
+  const H=c.offsetHeight>0?c.offsetHeight:c.height||400;
+  c.width=W;c.height=H;
+  ctx.fillStyle='#080808';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<80;i++){ctx.fillStyle=`rgba(255,${Math.random()*50|0},0,${Math.random()*.8+.2})`;ctx.fillRect(Math.random()*40-20,Math.random()*H,W,Math.random()*6+1);}
+  for(let i=0;i<25;i++){ctx.fillStyle=`rgba(0,255,${Math.random()*255|0},.12)`;ctx.fillRect(Math.random()*W,Math.random()*H,Math.random()*80+10,Math.random()*4+1);}
+  ctx.font=`bold ${(Math.random()*60+40)|0}px monospace`;ctx.fillStyle='rgba(255,255,255,.03)';
+  ctx.fillText('NULL',W*.1,H*.6);ctx.fillText('\u2205ERR',W*.3,H*.3);
+}
+function art1(c){
+  const ctx=c.getContext('2d');
+  const W=c.offsetWidth>0?c.offsetWidth:c.width||600;
+  const H=c.offsetHeight>0?c.offsetHeight:c.height||400;
+  c.width=W;c.height=H;
+  ctx.fillStyle='#050510';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<180;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*2,0,Math.PI*2);ctx.fillStyle=`rgba(${Math.random()*100|0},${Math.random()*150+100|0},255,${Math.random()*.6+.2})`;ctx.fill();}
+  for(let i=0;i<7;i++){ctx.strokeStyle=`rgba(0,${Math.random()*100+155|0},255,.07)`;ctx.lineWidth=Math.random()*18+4;ctx.beginPath();ctx.moveTo(Math.random()*W,0);ctx.lineTo(Math.random()*W,H);ctx.stroke();}
+  for(let i=0;i<4;i++){ctx.fillStyle='rgba(255,255,255,.45)';ctx.fillRect(Math.random()*W*.5,Math.random()*H,Math.random()*W*.3,Math.random()*3+1);}
+}
+function art2(c){
+  const ctx=c.getContext('2d');
+  const W=c.offsetWidth>0?c.offsetWidth:c.width||600;
+  const H=c.offsetHeight>0?c.offsetHeight:c.height||400;
+  c.width=W;c.height=H;
+  ctx.fillStyle='#080808';ctx.fillRect(0,0,W,H);
+  const cx=W/2,cy=H/2;
+  for(let r=5;r<Math.min(W,H)*.45;r+=11){const g=Math.random()>.7;ctx.beginPath();ctx.arc(cx+(g?Math.random()*10-5:0),cy+(g?Math.random()*10-5:0),r,0,Math.PI*2);ctx.strokeStyle=g?`rgba(255,${Math.random()*40|0},0,.55)`:'rgba(255,255,255,.07)';ctx.lineWidth=g?2:.5;ctx.stroke();}
+  for(let i=0;i<4;i++){const y=Math.random()*H;ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(0,y,W,Math.random()*4+1);ctx.fillStyle='rgba(255,0,60,.45)';ctx.fillRect(Math.random()*30-15,y,W*.4,Math.random()*4+1);}
+}
+function art3(c){
+  const ctx=c.getContext('2d');
+  const W=c.offsetWidth>0?c.offsetWidth:c.width||600;
+  const H=c.offsetHeight>0?c.offsetHeight:c.height||400;
+  c.width=W;c.height=H;
+  const img=ctx.createImageData(W,H);
+  for(let i=0;i<img.data.length;i+=4){const v=Math.random()>.97?Math.random()*255|0:0;img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}
+  ctx.putImageData(img,0,0);
+  for(let i=0;i<18;i++){const y=Math.random()*H,h=Math.random()*8+2;try{const sl=ctx.getImageData(0,y,W,h);ctx.putImageData(sl,Math.random()*60-30|0,y);}catch(e){}ctx.fillStyle=`rgba(255,${Math.random()*70|0},0,.2)`;ctx.fillRect(0,y,W,h);}
+}
+function art4(c){
+  const ctx=c.getContext('2d');
+  const W=c.offsetWidth>0?c.offsetWidth:c.width||600;
+  const H=c.offsetHeight>0?c.offsetHeight:c.height||400;
+  c.width=W;c.height=H;
+  ctx.fillStyle='#060606';ctx.fillRect(0,0,W,H);
+  const cols=Math.floor(W/4),rows=Math.floor(H/4);
+  for(let a=0;a<cols;a++)for(let b=0;b<rows;b++)if(Math.random()>.85){ctx.fillStyle=`rgba(${Math.random()*255|0},${Math.random()*100|0},${Math.random()*255|0},${Math.random()*.7+.1})`;ctx.fillRect(a*4,b*4,4+(Math.random()>.95?Math.random()*18|0:0),4);}
+  for(let i=0;i<6;i++){const y=Math.random()*H;ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(0,y,Math.random()*W*.8,Math.random()*3+.5);ctx.fillStyle='rgba(0,255,180,.35)';ctx.fillRect(Math.random()*W*.2,y+1,Math.random()*W*.6,1);}
+}
+const artFns=[art0,art1,art2,art3,art4,art0];
+
+// ═══ INK SPLATTER CURSOR ═══
+const inkC=document.getElementById('ink-canvas');
+const inkCtx=inkC.getContext('2d');
+let mx=window.innerWidth/2,my=window.innerHeight/2;
+let pmx=mx,pmy=my;
+let inkDrops=[];
+let inkSplatters=[];
+
+function resizeInk(){inkC.width=window.innerWidth;inkC.height=window.innerHeight;}
+resizeInk();
+window.addEventListener('resize',resizeInk);
+
 document.addEventListener('mousemove',e=>{
+  pmx=mx;pmy=my;
   mx=e.clientX;my=e.clientY;
-  dot.style.left=mx+'px';dot.style.top=my+'px';
-  trail.push({x:mx,y:my});
-  if(trail.length>28)trail.shift();
-});
-function lerp(a,b,t){return a+(b-a)*t;}
-function animCursor(){
-  rx=lerp(rx,mx,.12);ry=lerp(ry,my,.12);
-  ring.style.left=rx+'px';ring.style.top=ry+'px';
-  tctx.clearRect(0,0,trailCanvas.width,trailCanvas.height);
-  for(let i=1;i<trail.length;i++){
-    const t=trail[i],p=trail[i-1];
-    tctx.beginPath();tctx.moveTo(p.x,p.y);tctx.lineTo(t.x,t.y);
-    tctx.strokeStyle=`rgba(255,255,255,${(i/trail.length)*0.18})`;
-    tctx.lineWidth=2*(i/trail.length);tctx.stroke();
+  const dx=mx-pmx,dy=my-pmy;
+  const spd=Math.sqrt(dx*dx+dy*dy);
+
+  // main ink drop at cursor
+  inkDrops.push({x:mx,y:my,r:3+spd*.08,a:0.85,life:1,vx:(Math.random()-.5)*spd*.04,vy:(Math.random()-.5)*spd*.04+spd*.02});
+
+  // splatter on fast movement
+  if(spd>8){
+    const splats=Math.floor(spd/6);
+    for(let i=0;i<splats;i++){
+      const angle=Math.atan2(dy,dx)+( Math.random()-.5)*Math.PI*.7;
+      const dist=Math.random()*spd*1.2;
+      inkSplatters.push({
+        x:mx+Math.cos(angle)*dist*.3,
+        y:my+Math.sin(angle)*dist*.3,
+        tx:mx+Math.cos(angle)*dist,
+        ty:my+Math.sin(angle)*dist,
+        r:Math.random()*3+.5,
+        a:Math.random()*.7+.2,
+        life:1,
+        stretch:Math.random()*.4+.8,
+        angle:angle
+      });
+    }
   }
-  requestAnimationFrame(animCursor);
-}
-animCursor();
 
-// ── MAGNETIC BUTTON ──
-const magbtn=document.getElementById('magbtn');
-const magwrap=document.getElementById('magwrap');
-magbtn.style.transition='transform .5s cubic-bezier(.16,1,.3,1)';
-magwrap.addEventListener('mousemove',e=>{
-  const r=magbtn.getBoundingClientRect();
-  const bx=r.left+r.width/2,by=r.top+r.height/2;
-  const dx=e.clientX-bx,dy=e.clientY-by;
-  const dist=Math.sqrt(dx*dx+dy*dy);
-  if(dist<100){
-    const pull=1-(dist/100);
-    magbtn.style.transform=`translate(${dx*pull*.4}px,${dy*pull*.4}px)`;
-    ring.style.width='60px';ring.style.height='60px';
+  // trail drips
+  inkDrops.push({x:mx+(Math.random()-0.5)*4,y:my+(Math.random()-0.5)*4,r:Math.random()*2+.5,a:0.4,life:1,vx:(Math.random()-.5)*.5,vy:Math.random()*1.5+.5});
+});
+
+function drawInk(){
+  inkCtx.clearRect(0,0,inkC.width,inkC.height);
+
+  // draw splatters
+  inkSplatters=inkSplatters.filter(s=>s.life>0);
+  inkSplatters.forEach(s=>{
+    s.x+=(s.tx-s.x)*.15;
+    s.y+=(s.ty-s.y)*.15;
+    s.life-=0.025;
+    const alpha=s.a*s.life;
+    inkCtx.save();
+    inkCtx.translate(s.x,s.y);
+    inkCtx.rotate(s.angle);
+    inkCtx.scale(1+s.stretch,1);
+    inkCtx.beginPath();
+    inkCtx.arc(0,0,s.r,0,Math.PI*2);
+    inkCtx.fillStyle=`rgba(255,${Math.random()>0.85?60:255},${Math.random()>0.85?60:255},${alpha})`;
+    inkCtx.fill();
+    inkCtx.restore();
+  });
+
+  // draw drops
+  inkDrops=inkDrops.filter(d=>d.life>0.02);
+  inkDrops.forEach(d=>{
+    d.x+=d.vx;
+    d.y+=d.vy;
+    d.vy+=0.06; // gravity
+    d.vx*=0.97;
+    d.life-=0.022;
+    const alpha=d.a*d.life;
+    inkCtx.beginPath();
+    inkCtx.arc(d.x,d.y,d.r*d.life+.5,0,Math.PI*2);
+    inkCtx.fillStyle=`rgba(255,255,255,${alpha})`;
+    inkCtx.fill();
+  });
+
+  // cursor core dot
+  inkCtx.beginPath();
+  inkCtx.arc(mx,my,3,0,Math.PI*2);
+  inkCtx.fillStyle='rgba(255,255,255,0.9)';
+  inkCtx.fill();
+
+  // small red accent
+  inkCtx.beginPath();
+  inkCtx.arc(mx,my,1.2,0,Math.PI*2);
+  inkCtx.fillStyle='rgba(255,60,60,1)';
+  inkCtx.fill();
+
+  requestAnimationFrame(drawInk);
+}
+drawInk();
+
+// ═══ LIVING BG ═══
+const bgc=document.getElementById('bgcanvas'),bgctx=bgc.getContext('2d');
+let BW,BH,btime=0;
+function resizeBg(){BW=bgc.width=bgc.offsetWidth;BH=bgc.height=bgc.offsetHeight;}
+resizeBg();new ResizeObserver(resizeBg).observe(bgc);
+function noise(x,y,t){return Math.sin(x*.008+t)*Math.cos(y*.006+t*.7)+Math.sin(x*.003-t*.5)*Math.sin(y*.01+t*.3)+Math.cos(x*.012+y*.009+t*1.1)*.5;}
+function drawBg(){
+  btime+=.003;
+  bgctx.fillStyle='rgba(0,0,0,0.2)';bgctx.fillRect(0,0,BW,BH);
+  const step=28;
+  for(let x=0;x<BW;x+=step)for(let y=0;y<BH;y+=step){
+    const n=noise(x,y,btime);
+    if(n>.45){const a=(n-.45)*.07,r=Math.abs(Math.sin(btime+x*.01))*180|0;bgctx.fillStyle=`rgba(${r},${r*.08|0},0,${a})`;bgctx.fillRect(x,y,step,step);}
+    if(n<-.55&&Math.random()>.98){bgctx.fillStyle=`rgba(255,255,255,${(-n-.55)*.1})`;bgctx.fillRect(x+Math.random()*step,y+Math.random()*step,1,Math.random()*step*2);}
   }
-});
-magwrap.addEventListener('mouseleave',()=>{
-  magbtn.style.transform='translate(0,0)';
-  ring.style.width='36px';ring.style.height='36px';
-});
-
-// ── RING EXPAND ON HOVER ──
-document.querySelectorAll('.nav-links a').forEach(a=>{
-  a.addEventListener('mouseenter',()=>{ring.style.width='50px';ring.style.height='50px';});
-  a.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';});
-});
-document.querySelectorAll('.art-card').forEach(card=>{
-  card.addEventListener('mouseenter',()=>{ring.style.width='60px';ring.style.height='60px';ring.style.borderColor='rgba(255,255,255,.6)';});
-  card.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(255,255,255,.35)';});
-});
-
-// ── PARTICLES ──
-const pc=document.getElementById('pcanvas');
-const pctx=pc.getContext('2d');
-let PW,PH,pts=[],pmx=-999,pmy=-999;
-function resizeP(){
-  PW=pc.width=pc.offsetWidth;PH=pc.height=pc.offsetHeight;
-  pts=[];const n=Math.floor(PW*PH/7000);
-  for(let i=0;i<n;i++)pts.push({x:Math.random()*PW,y:Math.random()*PH,r:Math.random()*1.2+.3,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,a:Math.random()*.5+.1});
+  if(Math.random()>.989){bgctx.fillStyle=`rgba(255,${Math.random()*40|0},0,${Math.random()*.08})`;bgctx.fillRect(0,Math.random()*BH,BW,Math.random()*3+.5);}
+  requestAnimationFrame(drawBg);
 }
-document.addEventListener('mousemove',e=>{const r=pc.getBoundingClientRect();pmx=e.clientX-r.left;pmy=e.clientY-r.top;});
+drawBg();
+
+// ═══ PARTICLES ═══
+const pc=document.getElementById('pcanvas'),pctx=pc.getContext('2d');
+let PW,PH,pts=[];
+function resizeP(){PW=pc.width=pc.offsetWidth;PH=pc.height=pc.offsetHeight;pts=[];const n=Math.floor(PW*PH/9000);for(let i=0;i<n;i++)pts.push({x:Math.random()*PW,y:Math.random()*PH,r:Math.random()*1.1+.2,vx:(Math.random()-.5)*.11,vy:(Math.random()-.5)*.11,a:Math.random()*.3+.07});}
+document.addEventListener('mousemove',e=>{const r=pc.getBoundingClientRect();const lx=e.clientX-r.left,ly=e.clientY-r.top;pts.forEach(p=>{const dx=p.x-lx,dy=p.y-ly,d=Math.sqrt(dx*dx+dy*dy);if(d<90&&d>0){const f=(90-d)/90;p.x+=dx/d*f*2;p.y+=dy/d*f*2;}});});
 function drawP(){
   pctx.clearRect(0,0,PW,PH);
-  pts.forEach(p=>{
-    const dx=p.x-pmx,dy=p.y-pmy,d=Math.sqrt(dx*dx+dy*dy);
-    if(d<100&&d>0){const f=(100-d)/100;p.x+=dx/d*f*2;p.y+=dy/d*f*2;}
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0)p.x=PW;if(p.x>PW)p.x=0;if(p.y<0)p.y=PH;if(p.y>PH)p.y=0;
-    pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    pctx.fillStyle=`rgba(255,255,255,${p.a})`;pctx.fill();
-  });
-  pts.forEach((p,i)=>{
-    for(let j=i+1;j<pts.length;j++){
-      const q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<80){pctx.beginPath();pctx.moveTo(p.x,p.y);pctx.lineTo(q.x,q.y);pctx.strokeStyle=`rgba(255,255,255,${.06*(1-d/80)})`;pctx.lineWidth=.5;pctx.stroke();}
-    }
-  });
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=PW;if(p.x>PW)p.x=0;if(p.y<0)p.y=PH;if(p.y>PH)p.y=0;pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fillStyle=`rgba(255,255,255,${p.a})`;pctx.fill();});
+  pts.forEach((p,i)=>{for(let j=i+1;j<pts.length;j++){const q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);if(d<70){pctx.beginPath();pctx.moveTo(p.x,p.y);pctx.lineTo(q.x,q.y);pctx.strokeStyle=`rgba(255,255,255,${.04*(1-d/70)})`;pctx.lineWidth=.4;pctx.stroke();}}});
   requestAnimationFrame(drawP);
 }
-new ResizeObserver(resizeP).observe(pc);
-resizeP();drawP();
+new ResizeObserver(resizeP).observe(pc);resizeP();drawP();
 
-// ── TITLE GLITCH ──
-const glitchTitle=document.getElementById('glitch-title');
-function runTitleGlitch(){
-  const orig=['V','O','I','D'],chars='!@#$%^&*<>?/|01';
-  let iter=0;
-  const spans=glitchTitle.querySelectorAll('span');
-  const iv=setInterval(()=>{
-    spans.forEach((s,i)=>{
-      if(iter>i*3+6){s.textContent=orig[i];s.style.color='';return;}
-      s.textContent=chars[Math.floor(Math.random()*chars.length)];
-      s.style.color=iter%2===0?'rgba(255,30,30,.9)':'#fff';
-    });
-    iter++;
-    if(iter>30){clearInterval(iv);spans.forEach((s,i)=>{s.textContent=orig[i];s.style.color='';});}
-  },60);
-}
-setInterval(runTitleGlitch,5000);
-setTimeout(runTitleGlitch,3000);
-
-// ── FULL-SCREEN GLITCH FLASH ──
-const goverlay=document.getElementById('goverlay');
-const gc=document.getElementById('gcanvas');
-const gctx=gc.getContext('2d');
-function flashGlitch(){
-  gc.width=window.innerWidth;gc.height=window.innerHeight;
-  goverlay.style.opacity='1';goverlay.style.transition='opacity .05s';
-  let frame=0;
-  const iv=setInterval(()=>{
-    gctx.clearRect(0,0,gc.width,gc.height);
-    for(let i=0;i<Math.floor(Math.random()*12)+4;i++){
-      const y=Math.random()*gc.height,h=Math.random()*6+1;
-      gctx.fillStyle=`rgba(255,${Math.random()*50|0},${Math.random()*50|0},${Math.random()*.7+.1})`;
-      gctx.fillRect(Math.random()*60-30,y,gc.width,h);
-    }
-    for(let i=0;i<5;i++){
-      gctx.fillStyle='rgba(0,255,200,.05)';
-      gctx.fillRect(0,Math.random()*gc.height,gc.width,Math.random()*3+.5);
-    }
-    frame++;
-    if(frame>6){clearInterval(iv);goverlay.style.opacity='0';}
-  },50);
-}
-setInterval(flashGlitch,7000);
-setTimeout(flashGlitch,4500);
-
-// ── GLITCH ART GENERATORS ──
-function glitchArt0(c){const ctx=c.getContext('2d'),W=c.width=c.offsetWidth,H=c.height=c.offsetHeight;ctx.fillStyle='#080808';ctx.fillRect(0,0,W,H);for(let i=0;i<80;i++){ctx.fillStyle=`rgba(255,${Math.random()*50|0},${Math.random()*50|0},${Math.random()*.8+.2})`;ctx.fillRect(Math.random()*40-20,Math.random()*H,W,Math.random()*6+1);}for(let i=0;i<30;i++){ctx.fillStyle=`rgba(0,255,${Math.random()*255|0},.15)`;ctx.fillRect(Math.random()*W,Math.random()*H,Math.random()*80+10,Math.random()*4+1);}ctx.font=`bold ${(Math.random()*60+40)|0}px monospace`;ctx.fillStyle='rgba(255,255,255,.03)';ctx.fillText('NULL',W*.1,H*.6);ctx.fillText('\u2205ERR',W*.3,H*.3);}
-function glitchArt1(c){const ctx=c.getContext('2d'),W=c.width=c.offsetWidth,H=c.height=c.offsetHeight;ctx.fillStyle='#050510';ctx.fillRect(0,0,W,H);for(let i=0;i<200;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*2,0,Math.PI*2);ctx.fillStyle=`rgba(${Math.random()*100|0},${Math.random()*150+100|0},255,${Math.random()*.6+.2})`;ctx.fill();}for(let i=0;i<8;i++){ctx.strokeStyle=`rgba(0,${Math.random()*100+155|0},255,.08)`;ctx.lineWidth=Math.random()*20+5;ctx.beginPath();ctx.moveTo(Math.random()*W,0);ctx.lineTo(Math.random()*W,H);ctx.stroke();}for(let i=0;i<5;i++){ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(Math.random()*W*.5,Math.random()*H,Math.random()*W*.3,Math.random()*3+1);}}
-function glitchArt2(c){const ctx=c.getContext('2d'),W=c.width=c.offsetWidth,H=c.height=c.offsetHeight;ctx.fillStyle='#080808';ctx.fillRect(0,0,W,H);const cx=W/2,cy=H/2;for(let r=5;r<Math.min(W,H)*.45;r+=12){const g=Math.random()>.7;ctx.beginPath();ctx.arc(cx+(g?Math.random()*10-5:0),cy+(g?Math.random()*10-5:0),r,0,Math.PI*2);ctx.strokeStyle=g?`rgba(255,${Math.random()*50|0},${Math.random()*50|0},.6)`:'rgba(255,255,255,.08)';ctx.lineWidth=g?2:.5;ctx.stroke();}for(let i=0;i<4;i++){const y=Math.random()*H,h=Math.random()*4+1;ctx.fillStyle='rgba(255,255,255,.3)';ctx.fillRect(0,y,W,h);ctx.fillStyle='rgba(255,0,80,.5)';ctx.fillRect(Math.random()*30-15,y,W*.4,h);}}
-function glitchArt3(c){const ctx=c.getContext('2d'),W=c.width=c.offsetWidth,H=c.height=c.offsetHeight;const img=ctx.createImageData(W,H);for(let i=0;i<img.data.length;i+=4){const v=Math.random()>.97?Math.random()*255|0:0;img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}ctx.putImageData(img,0,0);for(let i=0;i<20;i++){const y=Math.random()*H,h=Math.random()*8+2;const sl=ctx.getImageData(0,y,W,h);ctx.putImageData(sl,Math.random()*60-30|0,y);ctx.fillStyle=`rgba(255,${Math.random()*80|0},0,.25)`;ctx.fillRect(0,y,W,h);}}
-function glitchArt4(c){const ctx=c.getContext('2d'),W=c.width=c.offsetWidth,H=c.height=c.offsetHeight;ctx.fillStyle='#060606';ctx.fillRect(0,0,W,H);const cols=Math.floor(W/4),rows=Math.floor(H/4);for(let x=0;x<cols;x++)for(let y=0;y<rows;y++)if(Math.random()>.85){ctx.fillStyle=`rgba(${Math.random()*255|0},${Math.random()*100|0},${Math.random()*255|0},${Math.random()*.7+.1})`;ctx.fillRect(x*4,y*4,4+(Math.random()>.95?Math.random()*20|0:0),4);}for(let i=0;i<6;i++){const y=Math.random()*H;ctx.fillStyle='rgba(255,255,255,.6)';ctx.fillRect(0,y,Math.random()*W*.8,Math.random()*3+.5);ctx.fillStyle='rgba(0,255,200,.4)';ctx.fillRect(Math.random()*W*.2,y+1,Math.random()*W*.6,1);}}
-
-const artFns=[glitchArt0,glitchArt1,glitchArt2,glitchArt3,glitchArt4];
-function initArt(){for(let i=0;i<5;i++){const c=document.getElementById('c'+i);if(!c)continue;new ResizeObserver(()=>artFns[i](c)).observe(c);artFns[i](c);}}
-
-let artIvs=[];
-document.querySelectorAll('.art-card').forEach((card,i)=>{
-  card.addEventListener('mouseenter',()=>{artIvs[i]=setInterval(()=>artFns[i](document.getElementById('c'+i)),100);});
-  card.addEventListener('mouseleave',()=>{clearInterval(artIvs[i]);artFns[i](document.getElementById('c'+i));});
+// ═══ VOID REPEL ═══
+const letters=document.querySelectorAll('.letter');
+document.addEventListener('mousemove',e=>{
+  letters.forEach(l=>{
+    const r=l.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    const dx=e.clientX-cx,dy=e.clientY-cy,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<200){const f=(1-dist/200),push=f*f;l.style.transform=`translate(${-dx/dist*push*60}px,${-dy/dist*push*45}px) skewX(${push*10}deg) scale(${1+push*.15})`;l.style.color=`rgba(255,${Math.max(0,255-push*500)|0},${Math.max(0,255-push*600)|0},1)`;l.style.textShadow=`0 0 ${push*25}px rgba(255,60,30,${push*.7})`;}
+    else{l.style.transform='';l.style.color='';l.style.textShadow='';}
+  });
 });
 
-// ── SCROLL REVEAL ──
-const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.12});
-document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+// ═══ PARALLAX ═══
+window.addEventListener('scroll',()=>{
+  const hi=document.getElementById('hero-inner');
+  if(hi)hi.style.transform=`translateY(${window.scrollY*.35}px)`;
+});
 
-setTimeout(initArt,300);
-window.addEventListener('load',initArt);
+// ═══ TITLE GLITCH ═══
+function titleGlitch(){
+  const orig=['V','O','I','D'],chars='!@#$%&*<>?01\u2205\u25a0';
+  let i=0;const spans=document.querySelectorAll('#void-title .letter');
+  const iv=setInterval(()=>{
+    spans.forEach((s,k)=>{
+      if(i>k*3+6){s.textContent=orig[k];s.style.color='';return;}
+      s.textContent=chars[Math.floor(Math.random()*chars.length)];
+      s.style.color=i%2===0?'rgba(255,40,30,.9)':'#fff';
+    });
+    i++;if(i>26){clearInterval(iv);spans.forEach((s,k)=>{s.textContent=orig[k];s.style.color='';})}
+  },55);
+}
+setInterval(titleGlitch,5500);setTimeout(titleGlitch,3500);
+
+// ═══ GLITCH FLASH ═══
+const gov=document.getElementById('goverlay'),gcel=document.getElementById('gcanvas'),gctx=gcel.getContext('2d');
+function flashGlitch(){
+  gcel.width=window.innerWidth;gcel.height=window.innerHeight;gov.style.opacity='1';
+  let f=0;const iv=setInterval(()=>{
+    gctx.clearRect(0,0,gcel.width,gcel.height);
+    for(let i=0;i<8;i++){gctx.fillStyle=`rgba(255,${Math.random()*40|0},0,${Math.random()*.4+.08})`;gctx.fillRect(Math.random()*40-20,Math.random()*gcel.height,gcel.width,Math.random()*5+1);}
+    f++;if(f>5){clearInterval(iv);gov.style.opacity='0';}
+  },50);
+}
+setInterval(flashGlitch,9000);setTimeout(flashGlitch,6500);
+
+// ═══ PAGE ROUTING ═══
+let currentArtwork=0;
+let awInterval=null;
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const map={home:'.nav-home',archive:'.nav-archive',about:'.nav-about'};
+  if(map[name])document.querySelector(map[name])?.classList.add('active');
+  window.scrollTo(0,0);
+  if(awInterval){clearInterval(awInterval);awInterval=null;}
+  setTimeout(()=>{
+    if(name==='archive')initArchiveCanvases();
+    if(name==='home')initHomeCanvases();
+    initReveal();
+    updateHMax();
+  },80);
+}
+
+function showArtwork(idx){
+  currentArtwork=idx;
+  if(awInterval){clearInterval(awInterval);awInterval=null;}
+  const aw=ARTWORKS[idx];
+  document.getElementById('aw-num').textContent=aw.num;
+  document.getElementById('aw-title').textContent=aw.name;
+  document.getElementById('aw-year').textContent=aw.year;
+  document.getElementById('aw-medium').textContent=aw.medium;
+  document.getElementById('aw-cat').textContent=aw.cat;
+  document.getElementById('aw-desc').textContent=aw.desc;
+  document.getElementById('aw-process').textContent=aw.process;
+  const fromArchive=document.getElementById('page-archive').classList.contains('active');
+  document.getElementById('aw-back').onclick=()=>showPage(fromArchive?'archive':'home');
+  document.getElementById('aw-back2').onclick=()=>showPage(fromArchive?'archive':'home');
+  document.getElementById('aw-fullscreen').onclick=()=>openLightbox(idx);
+  showPage('artwork');
+  setTimeout(()=>{
+    const c=document.getElementById('aw-canvas');
+    c.width=800;c.height=500;
+    artFns[idx](c);
+    awInterval=setInterval(()=>artFns[idx](c),160);
+  },150);
+}
+
+function openLightbox(idx){
+  const aw=ARTWORKS[idx];
+  const lb=document.getElementById('lightbox');
+  const lbc=document.getElementById('lb-canvas');
+  lbc.width=800;lbc.height=500;
+  artFns[idx](lbc);
+  document.getElementById('lb-name').textContent=aw.name;
+  document.getElementById('lb-tag').textContent=aw.cat;
+  lb.classList.add('open');
+  let lbiv=setInterval(()=>artFns[idx](lbc),130);
+  lb.dataset.iv=lbiv;
+}
+document.getElementById('lb-close').addEventListener('click',()=>{
+  clearInterval(parseInt(document.getElementById('lightbox').dataset.iv||0));
+  document.getElementById('lightbox').classList.remove('open');
+});
+
+// ═══ CANVAS INITS ═══
+function initHomeCanvases(){
+  const fc=document.getElementById('featured-canvas');
+  if(fc&&fc.offsetWidth>0){fc.width=fc.offsetWidth;fc.height=fc.offsetHeight;art1(fc);setInterval(()=>art1(fc),220);}
+  [0,1,2].forEach(i=>{const c=document.getElementById('lc'+i);if(c&&c.offsetWidth>0){c.width=c.offsetWidth;c.height=c.offsetHeight;artFns[i+2](c);}});
+  for(let i=0;i<6;i++){const c=document.getElementById('hc'+i);if(c){c.width=320;c.height=240;artFns[i](c);}}
+}
+function initArchiveCanvases(){
+  for(let i=0;i<6;i++){const c=document.getElementById('ac'+i);if(c&&c.offsetWidth>0){c.width=c.offsetWidth;c.height=c.offsetHeight;artFns[i](c);}}
+}
+
+// hover regen
+document.querySelectorAll('.archive-card,.horiz-card,.latest-card').forEach((card,i)=>{
+  let iv;
+  const cid=card.querySelector('canvas')?.id;
+  if(!cid)return;
+  card.addEventListener('mouseenter',()=>{iv=setInterval(()=>{const c=document.getElementById(cid);if(c)artFns[i%artFns.length](c);},100);});
+  card.addEventListener('mouseleave',()=>{clearInterval(iv);const c=document.getElementById(cid);if(c)artFns[i%artFns.length](c);});
+});
+
+// ═══ FILTER ═══
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const f=btn.dataset.filter;
+    document.querySelectorAll('.archive-card').forEach(card=>{
+      if(f==='all'||card.dataset.cats.includes(f)){card.classList.remove('hidden');}
+      else{card.classList.add('hidden');}
+    });
+  });
+});
+
+// ═══ HORIZ SCROLL ═══
+const track=document.getElementById('horiz-track'),hwrap=document.getElementById('horiz-wrap');
+let hScroll=0,hTarget=0,hMax=0;
+function updateHMax(){if(track&&hwrap)hMax=Math.max(0,track.scrollWidth-hwrap.offsetWidth+96);}
+updateHMax();window.addEventListener('resize',updateHMax);
+if(hwrap){hwrap.addEventListener('wheel',e=>{e.preventDefault();hTarget+=e.deltaY*.85;hTarget=Math.max(0,Math.min(hMax,hTarget));},{passive:false});}
+let isDragging=false,dragStart=0,scrollStart=0;
+if(hwrap){hwrap.addEventListener('mousedown',e=>{isDragging=true;dragStart=e.clientX;scrollStart=hTarget;});}
+window.addEventListener('mouseup',()=>isDragging=false);
+window.addEventListener('mousemove',e=>{if(isDragging&&hwrap){hTarget=scrollStart-(e.clientX-dragStart);hTarget=Math.max(0,Math.min(hMax,hTarget));}});
+function animHoriz(){if(track){hScroll+=(hTarget-hScroll)*.09;track.style.transform=`translateX(${-hScroll}px)`;}requestAnimationFrame(animHoriz);}
+animHoriz();
+
+// ═══ MAGNETIC BUTTON ═══
+const mw1=document.getElementById('mw1'),mb1=document.getElementById('mb1');
+if(mw1&&mb1){mb1.style.transition='transform .5s cubic-bezier(.16,1,.3,1)';mw1.addEventListener('mousemove',e=>{const r=mb1.getBoundingClientRect(),bx=r.left+r.width/2,by=r.top+r.height/2,dx=e.clientX-bx,dy=e.clientY-by,d=Math.sqrt(dx*dx+dy*dy);if(d<110){const p=1-d/110;mb1.style.transform=`translate(${dx*p*.4}px,${dy*p*.4}px)`;}});mw1.addEventListener('mouseleave',()=>mb1.style.transform='translate(0,0)');}
+
+// ═══ TERMINAL ═══
+const termBox=document.getElementById('term-box'),termCur=document.getElementById('term-cur');
+const lines=[
+  '> INITIALIZING VOID...',
+  '> LOADING SIGNAL_DECAY.glitch',
+  '> LOADING NULL_ENTITY.corrupt',
+  '> CALIBRATING DARKNESS... 100%',
+  '> ARTIST: ALI ABDEEN',
+  '> CO-ARCHITECT: CLAUDE [ANTHROPIC]',
+  '> PAGES: HOME / ARCHIVE / ABOUT',
+  '> WELCOME TO THE VOID.',
+  '> _'
+];
+let li=0;
+function typeLine(){
+  if(li>=lines.length-1){
+    setTimeout(()=>{
+      const ti=document.getElementById('terminal-intro');
+      ti.style.transition='opacity .8s';ti.style.opacity='0';
+      setTimeout(()=>{
+        ti.style.display='none';
+        document.getElementById('hero-inner').classList.add('hero-revealed');
+        initHomeCanvases();
+        setTimeout(updateHMax,600);
+      },800);
+    },600);
+    return;
+  }
+  const div=document.createElement('div');
+  div.className='term-line';div.textContent=lines[li];
+  termBox.insertBefore(div,termCur);div.classList.add('typed');
+  li++;setTimeout(typeLine,li===lines.length-1?400:280);
+}
+setTimeout(typeLine,500);
+
+// ═══ SCROLL REVEAL ═══
+function initReveal(){
+  const obs=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(r=>{r.classList.remove('visible');obs.observe(r);});
+}
+initReveal();
 </script>
 </body>
 </html>
